@@ -1,4 +1,9 @@
 {
     "files": [
-        "widget.py"    ]
+        "widget.py",
+        "main.qml",
+        "sure.png",
+        "app.pro"
+
+    ]
 }

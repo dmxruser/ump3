@@ -2,59 +2,63 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import Qt.labs.platform 1.1
 import Qt.labs.folderlistmodel 2.1
+import QtMultimedia 6.5
 
 ApplicationWindow {
     visible: true
     width: 400
     height: 300
-    title: "Folder Picker with Validation"
+    title: "ump3"
 
-    property var targets: ["local", "config", "chroot", "cache", "binary", "auto"]
-    property string savedFolder: ""
+    MediaPlayer {
+        id: audioPlayer
+        audioOutput: AudioOutput {}
+    }
 
-    FolderDialog {
-        id: folderDialog
-        title: "Select a folder"
+    FileDialog {
+        id: fileDialog
+        title: "Select an MP3 file"
+        nameFilters: ["MP3 files (*.mp3)"]
         onAccepted: {
-            var selectedFolder = folderDialog.folder
-            folderModel.folder = selectedFolder
+            if (fileDialog.files.length > 0) {
+                console.log("Accepted file URL:", fileDialog.files[0])
+                audioPlayer.source = fileDialog.files[0]
+            } else {
+                console.warn("No file selected 💀")
+            }
         }
     }
+
+
 
     FolderListModel {
         id: folderModel
         folder: ""
         showDirs: true
         showFiles: false
+    }
 
-        onCountChanged: {
-            if (folderModel.folder === "") return;
+    Column {
+        anchors.centerIn: parent
+        spacing: 20
 
-            var foundMatch = false
-            for (var i = 0; i < folderModel.count; ++i) {
-                var entry = folderModel.get(i).fileName
-                if (targets.indexOf(entry) !== -1) {
-                    foundMatch = true
-                    break
-                }
-            }
+        Button {
+            text: "Choose MP3 File"
+            onClicked: fileDialog.open()
+        }
 
-            if (foundMatch) {
-                savedFolder = folderModel.folder
-                console.log("✅ Folder saved:", savedFolder)
-                folderDialog.close()
-            } else {
-                console.log("❌ Folder missing targets, closing dialog")
-                folderDialog.close()
+        Button {
+            text: "Play MP3 File"
+            onClicked: {
+                audioPlayer.play()
             }
         }
-    }
 
-    Button {
-        text: "Choose Folder"
-        onClicked: folderDialog.open()
+        Image {
+            source: "sure.png"
+            width: 64
+            height: 64
+            fillMode: Image.PreserveAspectFit
+        }
     }
 }
-
-
-
