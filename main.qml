@@ -6,7 +6,7 @@ import QtMultimedia 6.5
 
 ApplicationWindow {
     visible: true
-    width: 400
+    width: 300
     height: 300
     title: "ump3"
 
