@@ -1,14 +1,16 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import Qt.labs.platform 1.1
-import Qt.labs.folderlistmodel 2.1
+import QtQuick 6.5
+import QtQuick.Controls 6.5
+import QtQuick.Dialogs 6.5
 import QtMultimedia 6.5
 
 ApplicationWindow {
     visible: true
-    width: 300
-    height: 200
+    width: 350
+    height: 250
     title: "ump3"
+
+    // state variable for play/pause
+    property bool isPlaying: false
 
     MediaPlayer {
         id: audioPlayer
@@ -18,29 +20,19 @@ ApplicationWindow {
     FileDialog {
         id: fileDialog
         title: "Select an MP3 file"
-        nameFilters: ["MP3 files (*.mp3)"]
+        nameFilters: ["Audio Files (*.mp3 *.ogg *.wav)"]
         onAccepted: {
-            if (fileDialog.files.length > 0) {
-                console.log("Accepted file URL:", fileDialog.files[0])
-                audioPlayer.source = fileDialog.files[0]
-            } else {
-                console.warn("No file selected 💀")
+            if (selectedFile !== "") {
+                console.log("Loaded MP3:", selectedFile)
+                audioPlayer.source = selectedFile
+                isPlaying = false  // reset state
             }
         }
     }
 
-
-
-    FolderListModel {
-        id: folderModel
-        folder: ""
-        showDirs: true
-        showFiles: false
-    }
-
     Column {
         anchors.centerIn: parent
-        spacing: 20
+        spacing: 16
 
         Button {
             text: "Choose MP3 File"
@@ -48,17 +40,25 @@ ApplicationWindow {
         }
 
         Button {
-            text: "Play MP3 File"
+            text: isPlaying ? "⏸ Pause" : "▶️ Play"
+            enabled: audioPlayer.source !== ""
             onClicked: {
-                audioPlayer.play()
+                isPlaying = !isPlaying
+                if (isPlaying) {
+                    audioPlayer.play()
+                } else {
+                    audioPlayer.pause()
+                }
             }
         }
 
+
         Image {
-            source: "sure.png"
-            width: 64
-            height: 64
+            source: isPlaying ? "playing.png" : "paused.png"
+            width: 48
+            height: 48
             fillMode: Image.PreserveAspectFit
         }
     }
 }
+
