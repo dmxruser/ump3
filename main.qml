@@ -9,12 +9,19 @@ ApplicationWindow {
     height: 250
     title: "ump3"
 
-    // state variable for play/pause
     property bool isPlaying: false
 
     MediaPlayer {
         id: audioPlayer
         audioOutput: AudioOutput {}
+        onPositionChanged: {
+            if (!audioPositionSlider.pressed) {
+                audioPositionSlider.value = position;
+            }
+        }
+        onDurationChanged: {
+            audioPositionSlider.to = duration;
+        }
     }
 
     FileDialog {
@@ -25,7 +32,22 @@ ApplicationWindow {
             if (selectedFile !== "") {
                 console.log("Loaded MP3:", selectedFile)
                 audioPlayer.source = selectedFile
-                isPlaying = false  // reset state
+                isPlaying = false
+            }
+        }
+    }
+    menuBar: MenuBar {
+        Menu {
+            title: "File"
+            MenuItem {
+                text: "Open"
+                onTriggered: fileDialog.open()
+
+            }
+            MenuSeparator {}
+            MenuItem {
+                text: "Exit"
+                onTriggered: Qt.quit()
             }
         }
     }
@@ -34,11 +56,15 @@ ApplicationWindow {
         anchors.centerIn: parent
         spacing: 16
 
-        Button {
-            text: "Choose MP3 File"
-            onClicked: fileDialog.open()
-        }
+        Slider {
+            id: audioPositionSlider
+            from: 0
+            to: audioPlayer.duration
 
+            onMoved: {
+                audioPlayer.position = value;
+            }
+        }
         Button {
             text: isPlaying ? "⏸ Pause" : "▶️ Play"
             enabled: audioPlayer.source !== ""
@@ -54,11 +80,10 @@ ApplicationWindow {
 
 
         Image {
-            source: isPlaying ? "playing.png" : "paused.png"
+            source: isPlaying ? "sure.png" : "sure.png"
             width: 48
             height: 48
             fillMode: Image.PreserveAspectFit
         }
     }
 }
-
