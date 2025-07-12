@@ -66,7 +66,7 @@ ApplicationWindow {
             }
         }
         Button {
-            text: isPlaying ? "⏸ Pause" : "▶️ Play"
+            text: isPlaying ? "⏸" : "▶️"
             enabled: audioPlayer.source !== ""
             onClicked: {
                 isPlaying = !isPlaying
