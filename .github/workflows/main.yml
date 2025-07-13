@@ -1,1 +1,51 @@
-title
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run the application (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-glx libegl1-mesa libxkbcommon-x11-0 libpulse-dev
+        xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" python widget.py &
+        sleep 10
+        kill $!
+
+    - name: Run the application (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        start /B python widget.py
+        timeout 10
+        taskkill /IM python.exe /F
+
+    - name: Run the application (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        python widget.py &
+        sleep 10
+        kill $!
