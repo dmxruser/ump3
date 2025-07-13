@@ -1,48 +1,69 @@
-import QtQuick 6.5
-import QtQuick.Controls 6.5
-import QtQuick.Dialogs 6.5
-import QtMultimedia 6.5
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Dialogs
+import QtMultimedia
 
 ApplicationWindow {
+    id: mainWindow
     visible: true
-    width: 350
-    height: 250
+    width: 640
+    height: 480
     title: "ump3"
 
     property bool isPlaying: false
+    property url initialMedia: "" // Property to hold media from command line
+
+    Component.onCompleted: {
+        if (initialMedia) {
+            mediaPlayer.source = initialMedia
+            mediaPlayer.play()
+        }
+    }
 
     MediaPlayer {
-        id: audioPlayer
+        id: mediaPlayer
+        videoOutput: videoOutput
         audioOutput: AudioOutput {}
-        onPositionChanged: {
-            if (!audioPositionSlider.pressed) {
-                audioPositionSlider.value = position;
-            }
+
+        onPlaybackStateChanged: function(state) {
+            isPlaying = state === MediaPlayer.PlayingState
+            console.log("Playback state changed: " + state)
         }
-        onDurationChanged: {
-            audioPositionSlider.to = duration;
+
+        onErrorOccurred: {
+            console.error("MediaPlayer Error:", error, "String:", errorString)
+        }
+
+        onMediaStatusChanged: function(status) {
+            console.log("MediaPlayer status changed: " + status)
+            if (status === MediaPlayer.InvalidMedia) {
+                console.error("Media source is invalid:", mediaPlayer.source)
+            }
         }
     }
 
-    FileDialog {
-        id: fileDialog
-        title: "Select an MP3 file"
-        nameFilters: ["Audio Files (*.mp3 *.ogg *.wav)", "Video Files (*.mp4)"]
-        onAccepted: {
-            if (selectedFile !== "") {
-                console.log("Loaded MP3:", selectedFile)
-                audioPlayer.source = selectedFile
-                isPlaying = false
-            }
+    VideoOutput {
+        id: videoOutput
+        anchors.fill: parent
+        visible: mediaPlayer.hasVideo
+    }
+
+    // Connect to the fileSelected signal from the Python backend
+    Connections {
+        target: backend
+        function onFileSelected(fileUrl) {
+            mediaPlayer.source = fileUrl
+            mediaPlayer.play()
         }
     }
+
     menuBar: MenuBar {
         Menu {
             title: "File"
             MenuItem {
                 text: "Open"
-                onTriggered: fileDialog.open()
-
+                // Call the Python method to open the dialog
+                onTriggered: backend.openFileDialog()
             }
             MenuSeparator {}
             MenuItem {
@@ -52,38 +73,42 @@ ApplicationWindow {
         }
     }
 
-    Column {
-        anchors.centerIn: parent
-        spacing: 16
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 60
+        color: "#40000000"
 
-        Slider {
-            id: audioPositionSlider
-            from: 0
-            to: audioPlayer.duration
+        Row {
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 20
 
-            onMoved: {
-                audioPlayer.position = value;
-            }
-        }
-        Button {
-            text: isPlaying ? "⏸" : "▶️"
-            enabled: audioPlayer.source !== ""
-            onClicked: {
-                isPlaying = !isPlaying
-                if (isPlaying) {
-                    audioPlayer.play()
-                } else {
-                    audioPlayer.pause()
+            Button {
+                text: mediaPlayer.playbackState === MediaPlayer.PlayingState ? "⏸" : "▶️"
+                onClicked: {
+                    if (mediaPlayer.playbackState === MediaPlayer.PlayingState) {
+                        mediaPlayer.pause()
+                    } else {
+                        mediaPlayer.play()
+                    }
                 }
             }
-        }
 
+            Slider {
+                id: mediaPositionSlider
+                from: 0
+                to: mediaPlayer.duration
+                value: mediaPlayer.position
+                enabled: mediaPlayer.seekable
 
-        Image {
-            source: isPlaying ? "sure.png" : "sure.png"
-            width: 48
-            height: 48
-            fillMode: Image.PreserveAspectFit
+                onPressedChanged: {
+                    if (!pressed) {
+                        mediaPlayer.position = value
+                    }
+                }
+            }
         }
     }
 }
