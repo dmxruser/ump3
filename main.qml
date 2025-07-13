@@ -9,6 +9,7 @@ ApplicationWindow {
     width: 640
     height: 480
     title: "ump3"
+    
 
     property bool isPlaying: false
     property url initialMedia: "" // Property to hold media from command line
@@ -45,25 +46,59 @@ ApplicationWindow {
     VideoOutput {
         id: videoOutput
         anchors.fill: parent
-        visible: mediaPlayer.hasVideo
+        visible: !isImage
     }
+
+    property bool isImage: false // New property to track if current media is an image
 
     // Connect to the fileSelected signal from the Python backend
     Connections {
         target: backend
         function onFileSelected(fileUrl) {
-            mediaPlayer.source = fileUrl
-            mediaPlayer.play()
+            var fileExtension = fileUrl.split('.').pop().toLowerCase();
+            var isVideoFile = (fileExtension === "mp4" || fileExtension === "mov" || fileExtension === "avi");
+            var isImageFile = (fileExtension === "gif" || fileExtension === "jpeg" || fileExtension === "jpg" || fileExtension === "png" || fileExtension === "webp");
+
+            if (isImageFile) {
+                isImage = true;
+                videoOutput.visible = false; // Hide video output for images
+                imageDisplay.source = fileUrl;
+                mediaPlayer.stop(); // Stop any playing audio/video
+            } else {
+                isImage = false;
+                imageDisplay.source = ""; // Clear image source
+                mediaPlayer.source = fileUrl;
+                mediaPlayer.play();
+                videoOutput.visible = isVideoFile; // Show video output only for video files
+            }
         }
+    }
+
+    Image {
+        id: imageDisplay
+        anchors.fill: parent
+        fillMode: Image.PreserveAspectFit
+        visible: isImage // Only visible if an image is loaded
+        source: "" // Will be set by onFileSelected
     }
 
     menuBar: MenuBar {
         Menu {
             title: "File"
-            MenuItem {
-                text: "Open"
-                // Call the Python method to open the dialog
-                onTriggered: backend.openFileDialog()
+            Menu {
+                title: "Open"
+                MenuItem {
+                    text: "Open Audio"
+                    onTriggered: backend.openFileDialog("audio")
+                }
+                MenuItem {
+                    text: "Open Video"
+                    onTriggered: backend.openFileDialog("video")
+                }
+                MenuItem {
+                    text: "Open Image"
+                    onTriggered: backend.openFileDialog("image")
+                }
             }
             MenuSeparator {}
             MenuItem {
@@ -119,6 +154,7 @@ ApplicationWindow {
         anchors.bottom: parent.bottom
         height: 60
         color: "#40000000"
+        visible: !isImage // Hide when an image is selected
 
         Row {
             anchors.verticalCenter: parent.verticalCenter
