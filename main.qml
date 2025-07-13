@@ -27,7 +27,7 @@ ApplicationWindow {
     FileDialog {
         id: fileDialog
         title: "Select an MP3 file"
-        nameFilters: ["Audio Files (*.mp3 *.ogg *.wav)"]
+        nameFilters: ["Audio Files (*.mp3 *.ogg *.wav)", "Video Files (*.mp4)"]
         onAccepted: {
             if (selectedFile !== "") {
                 console.log("Loaded MP3:", selectedFile)
