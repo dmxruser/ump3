@@ -1,5 +1,4 @@
 import sys
-import os
 from PySide6.QtCore import QObject, QUrl, Slot, Signal
 from PySide6.QtWidgets import QApplication, QFileDialog
 from PySide6.QtGui import QIcon
