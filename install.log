@@ -1,0 +1,8 @@
+[15:41:20 2025-07-12] FETCHING Version 2.40.11
+[15:41:20 2025-07-12] DOWNLOADING https://github.com/spicetify/cli/releases/download/v2.40.11/spicetify-2.40.11-linux-amd64.tar.gz
+[15:41:21 2025-07-12] EXTRACTING /home/dmxruser/.spicetify/spicetify.tar.gz
+[15:41:21 2025-07-12] SETTING EXECUTABLE PERMISSIONS TO /home/dmxruser/.spicetify/spicetify
+[15:41:21 2025-07-12] REMOVING /home/dmxruser/.spicetify/spicetify.tar.gz
+[15:41:21 2025-07-12] spicetify path already set in /home/dmxruser/.zshrc, continuing...
+[15:41:21 2025-07-12] spicetify v2.40.11 was installed successfully to /home/dmxruser/.spicetify
+[15:41:21 2025-07-12] Run 'spicetify --help' to get started
