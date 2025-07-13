@@ -34,7 +34,7 @@ jobs:
           pip install -r requirements.txt
       
       - name: Build the application
-        run: pyside6-deploy widget.py
+        run: pyside6-deploy --no-input widget.py
         
       - name: Package the application
         run: |

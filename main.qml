@@ -71,6 +71,46 @@ ApplicationWindow {
                 onTriggered: Qt.quit()
             }
         }
+        Menu {
+            title: "Edit"
+            Menu {
+                title: "Speed"
+                MenuItem {
+                    text: "0.25x"
+                    onTriggered: mediaPlayer.playbackRate = 0.25
+
+                }
+                MenuItem {
+                    text: "0.5x"
+                    onTriggered: mediaPlayer.playbackRate = 0.5
+
+                }
+                MenuItem {
+                    text: "1.0x"
+                    onTriggered: mediaPlayer.playbackRate = 1.0
+
+                }
+                MenuItem {
+                    text: "1.25x"
+                    onTriggered: mediaPlayer.playbackRate = 1.25
+
+                }
+                MenuItem {
+                    text: "1.5x"
+                    onTriggered: mediaPlayer.playbackRate = 1.5
+
+                }
+                MenuItem {
+                    text: "1.75x"
+                    onTriggered: mediaPlayer.playbackRate = 1.75
+
+                }
+                MenuItem {
+                    text: "2.0x"
+                    onTriggered: mediaPlayer.playbackRate = 2.0
+                }
+            }
+        }
     }
 
     Rectangle {
