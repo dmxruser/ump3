@@ -1,51 +1,37 @@
+# This is a basic workflow to help you get started with Actions
+
 name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.9", "3.10", "3.11"]
+
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Run the application (Linux)
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-glx libegl1-mesa libxkbcommon-x11-0 libpulse-dev
-        xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" python widget.py &
-        sleep 10
-        kill $!
-
-    - name: Run the application (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        start /B python widget.py
-        timeout 10
-        taskkill /IM python.exe /F
-
-    - name: Run the application (macOS)
-      if: runner.os == 'macOS'
-      run: |
-        python widget.py &
-        sleep 10
-        kill $!
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyside6
+          pip install flake8
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Test with unittest
+        run: |
+          python -m unittest discover
