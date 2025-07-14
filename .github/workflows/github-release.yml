@@ -1,6 +1,6 @@
 name: Build and Release
 
-on:  push:    tags:      - 'v*.*.*' # Trigger on pushes to tags like v1.0.0, v1.0.1, etc.
+on:  workflow_dispatch: # Allows manual triggering from the GitHub UI  push:    tags:      - 'v*.*.*' # Trigger on pushes to tags like v1.0.0, v1.0.1, etc.
 
 jobs:  build-linux:    runs-on: ubuntu-latest    steps:      - name: Checkout code        uses: actions/checkout@v4
 
