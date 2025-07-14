@@ -1,7 +1,8 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Dialogs
-import QtMultimedia
+import QtQuick 6.8
+import QtQuick.Controls 6.8
+import QtQuick.Dialogs 6.8
+import QtMultimedia 6.8
+import "." // Import current directory to find MetadataPopup
 
 ApplicationWindow {
     id: mainWindow
@@ -9,7 +10,7 @@ ApplicationWindow {
     width: 640
     height: 480
     title: "ump3"
-    
+
 
     property bool isPlaying: false
     property url initialMedia: "" // Property to hold media from command line
@@ -41,6 +42,11 @@ ApplicationWindow {
                 console.error("Media source is invalid:", mediaPlayer.source)
             }
         }
+
+        onMetaDataChanged: {
+            console.log("Metadata changed:", mediaPlayer.metaData.keys());
+            metadataPopup.updateMetadata(mediaPlayer.metaData);
+        }
     }
 
     VideoOutput {
@@ -55,7 +61,7 @@ ApplicationWindow {
     Connections {
         target: backend
         function onFileSelected(fileUrl) {
-            var fileExtension = fileUrl.split('.').pop().toLowerCase();
+            var fileExtension = fileUrl.split(".").pop().toLowerCase();
             var isVideoFile = (fileExtension === "mp4" || fileExtension === "mov" || fileExtension === "avi");
             var isImageFile = (fileExtension === "gif" || fileExtension === "jpeg" || fileExtension === "jpg" || fileExtension === "png" || fileExtension === "webp");
 
@@ -99,6 +105,10 @@ ApplicationWindow {
                     text: "Open Image"
                     onTriggered: backend.openFileDialog("image")
                 }
+            }
+            MenuItem {
+                text: "Metadata"
+                onTriggered: metadataPopup.open()
             }
             MenuSeparator {}
             MenuItem {
@@ -146,6 +156,11 @@ ApplicationWindow {
                 }
             }
         }
+    }
+
+    MetadataPopup {
+        id: metadataPopup
+        anchors.centerIn: parent
     }
 
     Rectangle {

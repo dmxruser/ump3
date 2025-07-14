@@ -5,14 +5,10 @@ from PySide6.QtGui import QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
 class Backend(QObject):
-    # Signal to notify QML when a file has been selected
     fileSelected = Signal(str)
 
     @Slot(str)
     def openFileDialog(self, mediaType):
-        """
-        Opens a native file dialog and emits the path of the selected file based on mediaType.
-        """
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
 
@@ -23,12 +19,12 @@ class Backend(QObject):
         elif mediaType == "image":
             dialog.setNameFilter("Image Files (*.gif *.jpeg *.png *.webp)")
         else:
-            dialog.setNameFilter("All Files (*.*)") # Fallback
+            dialog.setNameFilter("All Files (*.*)")
 
         if dialog.exec():
             file_path = dialog.selectedFiles()[0]
-            # Emit the file path as a URL string for QML
-            self.fileSelected.emit(QUrl.fromLocalFile(file_path).toString())
+            url = QUrl.fromLocalFile(file_path)
+            self.fileSelected.emit(url.toString())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -38,11 +34,8 @@ if __name__ == "__main__":
     engine.rootContext().setContextProperty("backend", backend)
 
     engine.load("main.qml")
-
     if not engine.rootObjects():
         sys.exit(-1)
 
-    app_icon = QIcon("sure.png")
-    app.setWindowIcon(app_icon)
-
+    app.setWindowIcon(QIcon("sure.png"))
     sys.exit(app.exec())

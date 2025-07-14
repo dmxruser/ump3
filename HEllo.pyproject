@@ -3,7 +3,7 @@
         "widget.py",
         "main.qml",
         "sure.png",
-        "app.pro"
+        "MetadataPopup.qml"
 
     ]
 }
