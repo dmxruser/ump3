@@ -44,6 +44,7 @@ Popup {
             font.bold: true
             font.pointSize: 16
             Layout.alignment: Qt.AlignHCenter
+            color: mainWindow.palette.text
         }
 
         Rectangle {
@@ -68,11 +69,13 @@ Popup {
                     font.bold: true
                     Layout.preferredWidth: parent.width * 0.3
                     elide: Text.ElideRight
+                    color: mainWindow.palette.text
                 }
                 Text {
                     text: model.value
                     Layout.fillWidth: true
                     wrapMode: Text.WrapAnywhere
+                    color: mainWindow.palette.text
                 }
             }
         }

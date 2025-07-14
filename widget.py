@@ -1,4 +1,5 @@
 import sys
+import os
 from PySide6.QtCore import QObject, QUrl, Slot, Signal
 from PySide6.QtWidgets import QApplication, QFileDialog
 from PySide6.QtGui import QIcon
@@ -33,9 +34,20 @@ if __name__ == "__main__":
     backend = Backend()
     engine.rootContext().setContextProperty("backend", backend)
 
-    engine.load("main.qml")
+    if hasattr(sys, '_MEIPASS'):
+        # Running in a PyInstaller bundle
+        qml_file = os.path.join(sys._MEIPASS, "main.qml")
+    else:
+        # Running in a normal Python environment
+        qml_file = "main.qml"
+    engine.load(qml_file)
     if not engine.rootObjects():
         sys.exit(-1)
 
-    app.setWindowIcon(QIcon("sure.png"))
+    if hasattr(sys, '_MEIPASS'):
+        # Running in a PyInstaller bundle
+        app.setWindowIcon(QIcon(os.path.join(sys._MEIPASS, "sure.png")))
+    else:
+        # Running in a normal Python environment
+        app.setWindowIcon(QIcon("sure.png"))
     sys.exit(app.exec())
