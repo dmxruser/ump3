@@ -10,8 +10,6 @@ ApplicationWindow {
     width: 640
     height: 480
     title: "ump3"
-
-
     property bool isPlaying: false
     property url initialMedia: "" // Property to hold media from command line
 

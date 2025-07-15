@@ -1,9 +1,0 @@
-{
-    "files": [
-        "widget.py",
-        "main.qml",
-        "sure.png",
-        "MetadataPopup.qml"
-
-    ]
-}

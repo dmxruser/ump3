@@ -1,0 +1,4 @@
+dist/widget /usr/bin/ump3
+main.qml /usr/share/ump3/
+MetadataPopup.qml /usr/share/ump3/
+sure.png /usr/share/ump3/
