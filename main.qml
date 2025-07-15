@@ -192,7 +192,7 @@ ApplicationWindow {
                 to: mediaPlayer.duration
                 value: mediaPlayer.position
                 enabled: mediaPlayer.seekable
-                width: parent.width * 0.7
+                width: mainWindow.width * 0.5
 
                 onPressedChanged: {
                     if (!pressed) {
