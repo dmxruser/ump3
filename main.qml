@@ -165,6 +165,7 @@ ApplicationWindow {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+
         height: 60
         color: "#40000000"
         visible: !isImage // Hide when an image is selected
@@ -191,6 +192,7 @@ ApplicationWindow {
                 to: mediaPlayer.duration
                 value: mediaPlayer.position
                 enabled: mediaPlayer.seekable
+                width: parent.width * 0.7
 
                 onPressedChanged: {
                     if (!pressed) {
