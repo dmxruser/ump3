@@ -271,12 +271,12 @@ ApplicationWindow {
                         imageDisplay.rotation += 90
                         videoOutput.rotation += 90
                     }
+                }
                 MenuItem {
                     text: "Rotate Anti-Clockwise"
                     onTriggered: {
                         imageDisplay.rotation -= 90
                         videoOutput.rotation -= 90
-                    }
                     }
                 }
             }
