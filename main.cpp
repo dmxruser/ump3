@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QIcon>
+#include <QFileInfo>
 #include "backend.h"
 
 int main(int argc, char *argv[])
