@@ -1,4 +1,5 @@
-![Image](./sure.png "ump3") 
+<img src="./sure.png" alt="ump3's logo" width="100" height="100">
+
 ## UMP3 - A (dumb) media player
 
 ### As you probably already know, there are many media players, and they are very great
