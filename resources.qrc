@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>first.qml</file>
         <file>MetadataPopup.qml</file>
         <file>sure.png</file>
     </qresource>

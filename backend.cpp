@@ -32,6 +32,9 @@ void Backend::openFileDialog(const QString &mediaType)
         QString file_path = dialog.selectedFiles().first();
         QUrl url = QUrl::fromLocalFile(file_path);
         emit fileSelected(url.toString());
+        emit fileSelectionCompleted(true);
+    } else {
+        emit fileSelectionCompleted(false);
     }
 }
 

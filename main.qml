@@ -4,12 +4,9 @@ import QtQuick.Dialogs 6.8
 import QtMultimedia 6.8
 import "." // Import current directory to find MetadataPopup
 
-ApplicationWindow {
+Rectangle {
     id: mainWindow
-    visible: true
-    width: 640
-    height: 480
-    title: "ump3"
+    color: "#262626"
     property bool isPlaying: false
     property url initialMedia: "" // Property to hold media from command line
     property var playlist: []
@@ -191,98 +188,6 @@ ApplicationWindow {
         }
     }
 
-    menuBar: MenuBar {
-        Menu {
-            title: "File"
-            Menu {
-                title: "Open"
-                MenuItem {
-                    text: "Open Audio"
-                    onTriggered: backend.openFileDialog("audio")
-                }
-                MenuItem {
-                    text: "Open Video"
-                    onTriggered: backend.openFileDialog("video")
-                }
-                MenuItem {
-                    text: "Open Image"
-                    onTriggered: backend.openFileDialog("image")
-                }
-                MenuItem {
-                    text: "Open Folder/Playlist"
-                    onTriggered: backend.openFileDialog("folder")
-
-                }
-            }
-            MenuItem {
-                text: "Metadata"
-                onTriggered: metadataPopup.open()
-            }
-            MenuSeparator {}
-            MenuItem {
-                text: "Exit"
-                onTriggered: Qt.quit()
-            }
-        }
-        Menu {
-            title: "Edit"
-            Menu {
-                title: "Speed"
-                MenuItem {
-                    text: "0.25x"
-                    onTriggered: mediaPlayer.playbackRate = 0.25
-
-                }
-                MenuItem {
-                    text: "0.5x"
-                    onTriggered: mediaPlayer.playbackRate = 0.5
-
-                }
-                MenuItem {
-                    text: "1.0x"
-                    onTriggered: mediaPlayer.playbackRate = 1.0
-
-                }
-                MenuItem {
-                    text: "1.25x"
-                    onTriggered: mediaPlayer.playbackRate = 1.25
-
-                }
-                MenuItem {
-                    text: "1.5x"
-                    onTriggered: mediaPlayer.playbackRate = 1.5
-
-                }
-                MenuItem {
-                    text: "1.75x"
-                    onTriggered: mediaPlayer.playbackRate = 1.75
-
-                }
-                MenuItem {
-                    text: "2.0x"
-                    onTriggered: mediaPlayer.playbackRate = 2.0
-                }
-            }
-            Menu {
-                title: "Rotate"
-                MenuItem {
-                    text: "Rotate Clockwise"
-                    onTriggered: {
-                        imageDisplay.rotation += 90
-                        videoOutput.rotation += 90
-                    }
-                }
-                MenuItem {
-                    text: "Rotate Anti-Clockwise"
-                    onTriggered: {
-                        imageDisplay.rotation -= 90
-                        videoOutput.rotation -= 90
-                    }
-                }
-            }
-        }
-    }
-
     MetadataPopup {
         id: metadataPopup
         anchors.centerIn: parent
@@ -312,7 +217,6 @@ ApplicationWindow {
                     console.log("After action - Index:", currentPlaylistIndex);
                 }
             }
-
             Button {
                 text: mediaPlayer.playbackState === MediaPlayer.PlayingState ? "⏸" : "▶"
                 onClicked: {

@@ -15,6 +15,7 @@ public:
 
 signals:
     void fileSelected(const QString &fileUrl);
+    void fileSelectionCompleted(bool success);
 
 public slots:
     void openFileDialog(const QString &mediaType);
