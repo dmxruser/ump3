@@ -41,10 +41,50 @@ Rectangle {
         updateButtonStates();
     }
 
+    // --- NEW: Central function to load any media (file or folder) ---
+    function loadMedia(mediaUrl) {
+        if (!mediaUrl) return;
+
+        // Convert to string as backend expects string and it works for both url and string types
+        var mediaUrlStr = mediaUrl.toString();
+        var isFolder = backend.isDir(mediaUrlStr);
+
+        if (isFolder) {
+            playlist = backend.getFilesInDir(mediaUrlStr);
+            console.log("Playlist created with", playlist.length, "files from folder.");
+            if (playlist.length > 0) {
+                playTrackAtIndex(0); // Start playlist
+            } else {
+                currentPlaylistIndex = -1;
+                updateButtonStates(); // Update for empty playlist
+            }
+        } else {
+            // Logic for single files
+            playlist = [];
+            currentPlaylistIndex = -1;
+            var fileExtension = mediaUrlStr.split(".").pop().toLowerCase();
+            var isVideoFile = (fileExtension === "mp4" || fileExtension === "mov" || fileExtension === "avi");
+            var isImageFile = (fileExtension === "gif" || fileExtension === "jpeg" || fileExtension === "jpg" || fileExtension === "png" || fileExtension === "webp");
+
+            if (isImageFile) {
+                isImage = true;
+                videoOutput.visible = false;
+                imageDisplay.source = mediaUrlStr;
+                mediaPlayer.stop();
+            } else {
+                isImage = false;
+                imageDisplay.source = "";
+                mediaPlayer.source = mediaUrlStr;
+                mediaPlayer.play();
+                videoOutput.visible = isVideoFile;
+            }
+            updateButtonStates(); // Update for single file
+        }
+    }
+
     Component.onCompleted: {
         if (initialMedia) {
-            mediaPlayer.source = initialMedia
-            mediaPlayer.play()
+            loadMedia(initialMedia);
         }
         // Set initial button state
         updateButtonStates();
@@ -94,37 +134,7 @@ Rectangle {
     Connections {
         target: backend
         function onFileSelected(fileUrl) {
-            var isFolder = backend.isDir(fileUrl)
-            if (isFolder) {
-                playlist = backend.getFilesInDir(fileUrl);
-                console.log("Playlist created with", playlist.length, "files.");
-                if (playlist.length > 0) {
-                    playTrackAtIndex(0); // Start playlist
-                } else {
-                    currentPlaylistIndex = -1;
-                    updateButtonStates(); // Update for empty playlist
-                }
-            } else {
-                // Logic for single files
-                playlist = [];
-                currentPlaylistIndex = -1;
-                var fileExtension = fileUrl.split(".").pop().toLowerCase();
-                var isVideoFile = (fileExtension === "mp4" || fileExtension === "mov" || fileExtension === "avi");
-                var isImageFile = (fileExtension === "gif" || fileExtension === "jpeg" || fileExtension === "jpg" || fileExtension === "png" || fileExtension === "webp");
-                if (isImageFile) {
-                    isImage = true;
-                    videoOutput.visible = false;
-                    imageDisplay.source = fileUrl;
-                    mediaPlayer.stop();
-                } else {
-                    isImage = false;
-                    imageDisplay.source = "";
-                    mediaPlayer.source = fileUrl;
-                    mediaPlayer.play();
-                    videoOutput.visible = isVideoFile;
-                }
-                updateButtonStates(); // Update for single file
-            }
+            loadMedia(fileUrl);
         }
     }
 
@@ -150,6 +160,7 @@ Rectangle {
                     scale = Math.min(scaleX, scaleY);
 
                     // Manually center the image now that scale is set
+
                     x = (parent.width - width) / 2;
                     y = (parent.height - height) / 2;
                 }

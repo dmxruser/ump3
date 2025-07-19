@@ -11,10 +11,35 @@ ApplicationWindow {
     height: 480
     title: "ump3"
 
+    // Property to hold the loaded main.qml item
+    property var mainQml: null
+    // Property to hold a pending file URL if main.qml is not ready
+    property url pendingFileUrl: ""
+
     Loader {
         id: pageLoader
         anchors.fill: parent
+        onLoaded: {
+            // Store the loaded item and process any pending URL
+            mainQml = item;
+            if (pendingFileUrl) {
+                mainQml.loadMedia(pendingFileUrl);
+                pendingFileUrl = ""; // Clear it after use
+            }
+        }
     }
+
+    Component.onCompleted: {
+        // Check for media passed from command line
+        if (typeof initialMedia !== 'undefined' && initialMedia.toString() !== "") {
+            initialButtons.visible = false;
+            images.visible = false;
+            menuBar.visible = true;
+            pendingFileUrl = initialMedia; // Set pending URL
+            pageLoader.source = "main.qml"; // Load main.qml
+        }
+    }
+
     Column {
         id: images
         anchors.verticalCenter: parent.verticalCenter
@@ -51,12 +76,17 @@ ApplicationWindow {
 
     Connections {
         target: backend
-        function onFileSelectionCompleted(success) {
-            if (success) {
-                pageLoader.source = "main.qml"
-                menuBar.visible = true
-                initialButtons.visible = false
-                images.visible = false
+        function onFileSelected(fileUrl) {
+            if (mainQml) {
+                // If main.qml is already loaded, call it directly
+                mainQml.loadMedia(fileUrl);
+            } else {
+                // If not loaded, hide buttons, set pending URL, and load main.qml
+                initialButtons.visible = false;
+                images.visible = false;
+                menuBar.visible = true;
+                pendingFileUrl = fileUrl;
+                pageLoader.source = "main.qml";
             }
         }
     }
