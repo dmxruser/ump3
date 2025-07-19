@@ -56,6 +56,7 @@ ApplicationWindow {
                 pageLoader.source = "main.qml"
                 menuBar.visible = true
                 initialButtons.visible = false
+                images.visible = false
             }
         }
     }
