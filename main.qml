@@ -295,7 +295,7 @@ Rectangle {
 
         Row {
             anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenter: parent.horizontalLeft
             spacing: 20
 
             Button {
@@ -311,7 +311,6 @@ Rectangle {
             }
             Button {
                 text: mediaPlayer.playbackState === MediaPlayer.PlayingState ? "⏸" : "▶"
-                visible: !isImage
                 onClicked: {
                     if (mediaPlayer.playbackState === MediaPlayer.PlayingState) {
                         mediaPlayer.pause()
