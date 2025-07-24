@@ -1,7 +1,7 @@
-import QtQuick 6.8
-import QtQuick.Controls 6.8
-import QtQuick.Layouts 6.8
-import QtMultimedia 6.8
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtMultimedia
 
 Popup {
     id: metadataPopup
@@ -10,6 +10,25 @@ Popup {
     modal: true
     focus: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.AllButtons
+        onClicked: (mouse) => {
+            if (mouse.button === Qt.RightButton) {
+                console.log("MetadataPopup right clicked")
+                contextMenu.popup()
+            }
+        }
+    }
+
+    Menu {
+        id: contextMenu
+        MenuItem {
+            text: "Close"
+            onTriggered: metadataPopup.close()
+        }
+    }
 
     property var mediaMetadata: null // To hold the MediaMetadata object
 
@@ -99,5 +118,11 @@ Popup {
         visible: source !== ""
         x: parent.width - width - 10
         y: 10
+    }
+    MouseArea{
+        anchors.fill: parent
+        onClicked: {
+            console.log("MetadataPopup clicked")
+        }
     }
 }

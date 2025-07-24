@@ -4,26 +4,29 @@
 
 Backend::Backend(QObject *parent) : QObject(parent)
 {
+    m_appDescription = "This is a simple backend for a media player application.";
+}
+
+QString Backend::appDescription() const
+{
+    return m_appDescription;
 }
 
 void Backend::openFileDialog(const QString &mediaType)
 {
+    m_folderImageCheckVar = false;
     QFileDialog dialog;
-
-    if (mediaType == "audio") {
+    if (mediaType == "all_media") {
+        m_folderImageCheckVar = false;
         dialog.setFileMode(QFileDialog::ExistingFile);
-        dialog.setNameFilter(tr("Audio Files (*.mp3 *.ogg *.wav)"));
-    } else if (mediaType == "video") {
-        dialog.setFileMode(QFileDialog::ExistingFile);
-        dialog.setNameFilter(tr("Video Files (*.mp4 *.mov *.avi)"));
-    } else if (mediaType == "image") {
-        dialog.setFileMode(QFileDialog::ExistingFile);
-        dialog.setNameFilter(tr("Image Files (*.gif *.jpeg *.jpg *.png *.webp)"));
+        dialog.setNameFilter(tr("All Media Files (*.mp3 *.ogg *.wav *.mp4 *.mov *.avi *.gif *.jpeg *.jpg *.png *.webp);;Audio Files (*.mp3 *.ogg *.wav);;Video Files (*.mp4 *.mov *.avi);;Image Files (*.gif *.jpeg *.jpg *.png *.webp)"));
     } else if (mediaType == "folder") {
+        m_folderImageCheckVar = true;
         dialog.setFileMode(QFileDialog::Directory);
         dialog.setOption(QFileDialog::ShowDirsOnly, true);
     }
     else {
+        m_folderImageCheckVar = false;
         dialog.setFileMode(QFileDialog::ExistingFile);
         dialog.setNameFilter(tr("All Files (*.*)"));
     }

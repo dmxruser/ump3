@@ -1,7 +1,7 @@
-import QtQuick 6.8
-import QtQuick.Controls 6.8
-import QtQuick.Dialogs 6.8
-import QtMultimedia 6.8
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Dialogs
+import QtMultimedia
 import "."
 
 ApplicationWindow {
@@ -10,6 +10,29 @@ ApplicationWindow {
     width: 640
     height: 480
     title: "ump3"
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.AllButtons
+        onClicked: (mouse) => {
+            if (mouse.button === Qt.RightButton) {
+                console.log("first.qml right clicked")
+                contextMenu.popup()
+            }
+        }
+    }
+
+    Menu {
+        id: contextMenu
+        MenuItem {
+            text: "Open Media"
+            onTriggered: backend.openFileDialog("all_media")
+        }
+        MenuItem {
+            text: "Exit"
+            onTriggered: Qt.quit()
+        }
+    }
 
     // Property to hold the loaded main.qml item
     property var mainQml: null
@@ -22,6 +45,11 @@ ApplicationWindow {
         onLoaded: {
             // Store the loaded item and process any pending URL
             mainQml = item;
+            // Connect to the signal from main.qml to control the menu bar
+            mainQml.menuBarVisibilityRequest.connect(function(show) {
+                menuBar.visible = show;
+            });
+
             if (pendingFileUrl) {
                 mainQml.loadMedia(pendingFileUrl);
                 pendingFileUrl = ""; // Clear it after use
@@ -57,16 +85,8 @@ ApplicationWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 5
         Button {
-            text: "Open Audio"
-            onClicked: backend.openFileDialog("audio")
-        }
-        Button {
-            text: "Open Video"
-            onClicked: backend.openFileDialog("video")
-        }
-        Button {
-            text: "Open Image"
-            onClicked: backend.openFileDialog("image")
+            text: "Open Media"
+            onClicked: backend.openFileDialog("all_media")
         }
         Button {
             text: "Open Folder"
@@ -84,7 +104,6 @@ ApplicationWindow {
                 // If not loaded, hide buttons, set pending URL, and load main.qml
                 initialButtons.visible = false;
                 images.visible = false;
-                menuBar.visible = true;
                 pendingFileUrl = fileUrl;
                 pageLoader.source = "main.qml";
             }
@@ -99,16 +118,8 @@ ApplicationWindow {
             Menu {
                 title: "Open"
                 MenuItem {
-                    text: "Open Audio"
-                    onTriggered: backend.openFileDialog("audio")
-                }
-                MenuItem {
-                    text: "Open Video"
-                    onTriggered: backend.openFileDialog("video")
-                }
-                MenuItem {
-                    text: "Open Image"
-                    onTriggered: backend.openFileDialog("image")
+                    text: "Open Media"
+                    onTriggered: backend.openFileDialog("all_media")
                 }
                 MenuItem {
                     text: "Open Folder/Playlist"
@@ -124,6 +135,15 @@ ApplicationWindow {
             MenuItem {
                 text: "Exit"
                 onTriggered: Qt.quit()
+            }
+            MenuItem {
+                text: "Back"
+                onTriggered: {
+                    pageLoader.source = ""
+                    initialButtons.visible = true
+                    images.visible = true
+                    menuBar.visible = false
+                }
             }
         }
         Menu {

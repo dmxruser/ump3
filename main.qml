@@ -1,7 +1,7 @@
-import QtQuick 6.8
-import QtQuick.Controls 6.8
-import QtQuick.Dialogs 6.8
-import QtMultimedia 6.8
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Dialogs
+import QtMultimedia
 import "." // Import current directory to find MetadataPopup
 
 Rectangle {
@@ -11,6 +11,45 @@ Rectangle {
     property url initialMedia: "" // Property to hold media from command line
     property var playlist: []
     property int currentPlaylistIndex: -1
+
+    signal menuBarVisibilityRequest(bool show)
+
+    MouseArea {
+        id: mainMouseArea
+        anchors.fill: parent
+        enabled: !imageViewer.visible
+        acceptedButtons: Qt.AllButtons
+        onClicked: (mouse) => {
+            if (mouse.button === Qt.RightButton) {
+                console.log("main.qml right clicked")
+                contextMenu.popup()
+            }
+        }
+    }
+
+    Menu {
+        id: contextMenu
+        MenuItem {
+            text: mediaPlayer.playbackState === MediaPlayer.PlayingState ? "Pause" : "Play"
+            onTriggered: {
+                if (mediaPlayer.playbackState === MediaPlayer.PlayingState) {
+                    mediaPlayer.pause()
+                } else {
+                    mediaPlayer.play()
+                }
+            }
+        }
+        MenuItem {
+            text: "Next"
+            enabled: nextButton.enabled
+            onTriggered: playTrackAtIndex(currentPlaylistIndex + 1)
+        }
+        MenuItem {
+            text: "Previous"
+            enabled: prevButton.enabled
+            onTriggered: playTrackAtIndex(currentPlaylistIndex - 1)
+        }
+    }
 
     // --- Central function to manage button enabled states ---
     function updateButtonStates() {
@@ -24,28 +63,49 @@ Rectangle {
     function playTrackAtIndex(newIndex) {
         console.log("--- ACTION: playTrackAtIndex called with index:", newIndex, "---");
 
-        // If the requested index is out of bounds, just stop and update buttons.
         if (newIndex < 0 || newIndex >= playlist.length) {
             console.log("Invalid index. Stopping playback.");
             mediaPlayer.stop();
-            updateButtonStates(); // Call the central update function
+            updateButtonStates();
             return;
         }
 
-        // Set the new index and play the track
         currentPlaylistIndex = newIndex;
-        mediaPlayer.source = playlist[currentPlaylistIndex];
-        mediaPlayer.play();
-
-        // Update button states every time a track is successfully changed.
+        showMedia(playlist[currentPlaylistIndex], true); // It's from a playlist
         updateButtonStates();
+    }
+
+    // --- NEW: Central function to show media and control UI ---
+    function showMedia(mediaUrlStr, isFromPlaylist) {
+        var fileExtension = mediaUrlStr.split(".").pop().toLowerCase();
+        var isVideoFile = (fileExtension === "mp4" || fileExtension === "mov" || fileExtension === "avi");
+        var isImageFile = (fileExtension === "gif" || fileExtension === "jpeg" || fileExtension === "jpg" || fileExtension === "png" || fileExtension === "webp");
+
+        if (isImageFile) {
+            isImage = true;
+            videoOutput.visible = false;
+            imageDisplay.source = mediaUrlStr;
+            mediaPlayer.stop();
+        } else {
+            isImage = false;
+            imageDisplay.source = "";
+            mediaPlayer.source = mediaUrlStr;
+            mediaPlayer.play();
+            videoOutput.visible = isVideoFile;
+        }
+
+        // Control the menu bar visibility
+        if (isFromPlaylist) {
+            menuBarVisibilityRequest(true); // Always show for playlists
+        } else {
+            menuBarVisibilityRequest(!isImageFile); // Show for video/audio, hide for single image
+        }
     }
 
     // --- NEW: Central function to load any media (file or folder) ---
     function loadMedia(mediaUrl) {
         if (!mediaUrl) return;
 
-        // Convert to string as backend expects string and it works for both url and string types
         var mediaUrlStr = mediaUrl.toString();
         var isFolder = backend.isDir(mediaUrlStr);
 
@@ -62,22 +122,7 @@ Rectangle {
             // Logic for single files
             playlist = [];
             currentPlaylistIndex = -1;
-            var fileExtension = mediaUrlStr.split(".").pop().toLowerCase();
-            var isVideoFile = (fileExtension === "mp4" || fileExtension === "mov" || fileExtension === "avi");
-            var isImageFile = (fileExtension === "gif" || fileExtension === "jpeg" || fileExtension === "jpg" || fileExtension === "png" || fileExtension === "webp");
-
-            if (isImageFile) {
-                isImage = true;
-                videoOutput.visible = false;
-                imageDisplay.source = mediaUrlStr;
-                mediaPlayer.stop();
-            } else {
-                isImage = false;
-                imageDisplay.source = "";
-                mediaPlayer.source = mediaUrlStr;
-                mediaPlayer.play();
-                videoOutput.visible = isVideoFile;
-            }
+            showMedia(mediaUrlStr, false); // It's a single file
             updateButtonStates(); // Update for single file
         }
     }
@@ -88,6 +133,18 @@ Rectangle {
         }
         // Set initial button state
         updateButtonStates();
+    }
+
+    function resetImage() {
+        imageDisplay.scale = 1.0;
+        if (imageDisplay.sourceSize.width > 0) {
+            var scaleX = imageViewer.width / imageDisplay.sourceSize.width;
+            var scaleY = imageViewer.height / imageDisplay.sourceSize.height;
+            imageDisplay.scale = Math.min(scaleX, scaleY);
+        }
+        // Center the content after resetting the scale
+        imageViewer.contentX = (imageDisplay.width - imageViewer.width) / 2;
+        imageViewer.contentY = (imageDisplay.height - imageViewer.height) / 2;
     }
 
     MediaPlayer {
@@ -130,6 +187,7 @@ Rectangle {
     }
 
     property bool isImage: false
+    property bool isVideo: false
 
     Connections {
         target: backend
@@ -138,63 +196,86 @@ Rectangle {
         }
     }
 
-    Item {
+    Flickable {
         id: imageViewer
         anchors.fill: parent
         visible: isImage
         clip: true
+        contentWidth: imageDisplay.width
+        contentHeight: imageDisplay.height
+        boundsBehavior: Flickable.StopAtBounds
 
-        Image {
-            id: imageDisplay
-            source: ""
-            // x and y are now set imperatively, not with bindings.
+        // This MouseArea handles panning, zooming, and context menus.
+        MouseArea {
+            id: imageMouseArea
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+            cursorShape: Qt.OpenHandCursor
 
-            onStatusChanged: {
-                if (status === Image.Ready) {
-                    // Reset scale
-                    scale = 1.0;
+            property point lastMousePos: Qt.point(0, 0)
 
-                    // Fit to window
-                    var scaleX = parent.width / sourceSize.width;
-                    var scaleY = parent.height / sourceSize.height;
-                    scale = Math.min(scaleX, scaleY);
+            onPressed: (mouse) => {
+                if (mouse.button === Qt.LeftButton) {
+                    lastMousePos = Qt.point(mouse.x, mouse.y)
+                    cursorShape = Qt.ClosedHandCursor
+                }
+            }
 
-                    // Manually center the image now that scale is set
+            onReleased: (mouse) => {
+                if (mouse.button === Qt.LeftButton) {
+                    cursorShape = Qt.OpenHandCursor
+                }
+            }
 
-                    x = (parent.width - width) / 2;
-                    y = (parent.height - height) / 2;
+            onPositionChanged: (mouse) => {
+                if (mouse.buttons & Qt.LeftButton) {
+                    var deltaX = mouse.x - lastMousePos.x
+                    var deltaY = mouse.y - lastMousePos.y
+                    imageViewer.contentX -= deltaX
+                    imageViewer.contentY -= deltaY
+                    lastMousePos = Qt.point(mouse.x, mouse.y)
+                }
+            }
+
+            onWheel: (wheel) => {
+                var oldScale = imageDisplay.scale
+                var newScale = oldScale * (wheel.angleDelta.y > 0 ? 1.2 : 1 / 1.2)
+                newScale = Math.max(0.1, Math.min(newScale, 10)) // Clamp scale
+
+                if (Math.abs(newScale - oldScale) < 0.001) return;
+
+                imageDisplay.scale = newScale
+
+                // Adjust content position to zoom towards the mouse cursor
+                var mouseX = imageMouseArea.mouseX
+                var mouseY = imageMouseArea.mouseY
+                imageViewer.contentX = (imageViewer.contentX + mouseX) * (newScale / oldScale) - mouseX
+                imageViewer.contentY = (imageViewer.contentY + mouseY) * (newScale / oldScale) - mouseY
+            }
+
+            onClicked: (mouse) => {
+                if (mouse.button === Qt.RightButton) {
+                    contextMenu.popup()
+                } else if (mouse.button === Qt.MiddleButton) {
+                    mainWindow.resetImage()
                 }
             }
         }
 
-        PinchHandler {
-            id: pinchHandler
-            target: imageDisplay
-        }
+        Image {
+            id: imageDisplay
+            source: ""
+            // The image size is now its source size multiplied by the scale
+            width: sourceSize.width * scale
+            height: sourceSize.height * scale
+            scale: 1.0 // Initial scale
+            antialiasing: true
+            smooth: true
 
-        MouseArea {
-            anchors.fill: parent
-            drag.target: imageDisplay
-            drag.filterChildren: true
-            acceptedButtons: Qt.LeftButton
-
-            onWheel: (wheel) => {
-                var factor = wheel.angleDelta.y > 0 ? 1.2 : 1 / 1.2;
-                var newScale = imageDisplay.scale * factor;
-
-                // Clamp scale
-                newScale = Math.max(0.1, Math.min(newScale, 10));
-
-                if (Math.abs(newScale - imageDisplay.scale) < 0.001) return;
-
-                // Get mouse position relative to the image
-                var mouseOnImage = mapToItem(imageDisplay, wheel.x, wheel.y);
-
-                imageDisplay.scale = newScale;
-
-                // Reposition the image to keep the point under the mouse stationary
-                imageDisplay.x -= (mouseOnImage.x * factor - mouseOnImage.x);
-                imageDisplay.y -= (mouseOnImage.y * factor - mouseOnImage.y);
+            onStatusChanged: {
+                if (status === Image.Ready) {
+                    mainWindow.resetImage()
+                }
             }
         }
     }
@@ -210,7 +291,7 @@ Rectangle {
         anchors.bottom: parent.bottom
         height: 60
         color: "#40000000"
-        visible: !isImage
+        visible: !isImage || playlist.length > 0
 
         Row {
             anchors.verticalCenter: parent.verticalCenter
@@ -230,6 +311,7 @@ Rectangle {
             }
             Button {
                 text: mediaPlayer.playbackState === MediaPlayer.PlayingState ? "⏸" : "▶"
+                visible: !isImage
                 onClicked: {
                     if (mediaPlayer.playbackState === MediaPlayer.PlayingState) {
                         mediaPlayer.pause()
@@ -258,6 +340,7 @@ Rectangle {
                 value: mediaPlayer.position
                 enabled: mediaPlayer.seekable
                 width: mainWindow.width * 0.5
+                visible: !isImage
                 onPressedChanged: {
                     if (!pressed) {
                         mediaPlayer.position = value
