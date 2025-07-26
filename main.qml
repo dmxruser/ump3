@@ -8,11 +8,11 @@ Rectangle {
     id: mainWindow
     color: "#262626"
     property bool isPlaying: false
-    property url initialMedia: "" // Property to hold media from command line
+    property url initialMedia: ""
     property var playlist: []
     property int currentPlaylistIndex: -1
 
-    signal menuBarVisibilityRequest(bool show)
+    signal menuBarVisibilityRequest(bool show) // wrong name but whatever and it wroks
 
     MouseArea {
         id: mainMouseArea
@@ -31,6 +31,7 @@ Rectangle {
         id: contextMenu
         MenuItem {
             text: mediaPlayer.playbackState === MediaPlayer.PlayingState ? "Pause" : "Play"
+            enabled: !isImage
             onTriggered: {
                 if (mediaPlayer.playbackState === MediaPlayer.PlayingState) {
                     mediaPlayer.pause()
@@ -48,6 +49,55 @@ Rectangle {
             text: "Previous"
             enabled: prevButton.enabled
             onTriggered: playTrackAtIndex(currentPlaylistIndex - 1)
+        }
+        Menu {
+            title: "Speed"
+            enabled: !isImage
+            MenuItem {
+                text: "0.25x"
+                onTriggered: mediaPlayer.playbackRate = 0.25
+            }
+            MenuItem {
+                text: "0.5x"
+                onTriggered: mediaPlayer.playbackRate = 0.5
+            }
+            MenuItem {
+                text: "1.0x"
+                onTriggered: mediaPlayer.playbackRate = 1.0
+            }
+            MenuItem {
+                text: "1.25x"
+                onTriggered: mediaPlayer.playbackRate = 1.25
+            }
+            MenuItem {
+                text: "1.5x"
+                onTriggered: mediaPlayer.playbackRate = 1.5
+            }
+            MenuItem {
+                text: "1.75x"
+                onTriggered: mediaPlayer.playbackRate = 1.75
+            }
+            MenuItem {
+                text: "2.0x"
+                onTriggered: mediaPlayer.playbackRate = 2.0
+            }
+        }
+        Menu {
+            title: "Rotate"
+            MenuItem {
+                text: "Rotate Clockwise"
+                onTriggered: {
+                    imageDisplay.rotation += 90
+                    videoOutput.rotation += 90
+                }
+            }
+            MenuItem {
+                text: "Rotate Anti-Clockwise"
+                onTriggered: {
+                    imageDisplay.rotation -= 90
+                    videoOutput.rotation -= 90
+                }
+            }
         }
     }
 
@@ -98,7 +148,7 @@ Rectangle {
         if (isFromPlaylist) {
             menuBarVisibilityRequest(true); // Always show for playlists
         } else {
-            menuBarVisibilityRequest(!isImageFile); // Show for video/audio, hide for single image
+            menuBarVisibilityRequest(!isImageFile); // Wait WHY does it also remove the menu bar
         }
     }
 
@@ -171,7 +221,7 @@ Rectangle {
                     playTrackAtIndex(currentPlaylistIndex + 1);
                 } else {
                     console.log("End of playlist reached. Finalizing state.");
-                    updateButtonStates(); // Final update for the last track
+                    updateButtonStates();
                 }
             }
         }
@@ -205,7 +255,6 @@ Rectangle {
         contentHeight: imageDisplay.height
         boundsBehavior: Flickable.StopAtBounds
 
-        // This MouseArea handles panning, zooming, and context menus.
         MouseArea {
             id: imageMouseArea
             anchors.fill: parent
@@ -217,13 +266,11 @@ Rectangle {
             onPressed: (mouse) => {
                 if (mouse.button === Qt.LeftButton) {
                     lastMousePos = Qt.point(mouse.x, mouse.y)
-                    cursorShape = Qt.ClosedHandCursor
                 }
             }
 
             onReleased: (mouse) => {
                 if (mouse.button === Qt.LeftButton) {
-                    cursorShape = Qt.OpenHandCursor
                 }
             }
 
@@ -238,19 +285,13 @@ Rectangle {
             }
 
             onWheel: (wheel) => {
-                var oldScale = imageDisplay.scale
-                var newScale = oldScale * (wheel.angleDelta.y > 0 ? 1.2 : 1 / 1.2)
-                newScale = Math.max(0.1, Math.min(newScale, 10)) // Clamp scale
-
-                if (Math.abs(newScale - oldScale) < 0.001) return;
+                var newScale = imageDisplay.scale * (wheel.angleDelta.y > 0 ? 1.2 : 1 / 1.2)
+                newScale = Math.max(0.1, Math.min(newScale, 10)) //
 
                 imageDisplay.scale = newScale
 
-                // Adjust content position to zoom towards the mouse cursor
-                var mouseX = imageMouseArea.mouseX
-                var mouseY = imageMouseArea.mouseY
-                imageViewer.contentX = (imageViewer.contentX + mouseX) * (newScale / oldScale) - mouseX
-                imageViewer.contentY = (imageViewer.contentY + mouseY) * (newScale / oldScale) - mouseY
+                imageViewer.contentX = (imageViewer.contentX + imageMouseArea.mouseX) * (newScale / imageDisplay.scale) - mouseX
+                imageViewer.contentY = (imageViewer.contentY + imageMouseArea.mouseY) * (newScale / imageDisplay.scale) - mouseY
             }
 
             onClicked: (mouse) => {
@@ -286,6 +327,7 @@ Rectangle {
     }
 
     Rectangle {
+        id: a
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -331,6 +373,12 @@ Rectangle {
                     console.log("After action - Index:", currentPlaylistIndex);
                 }
             }
+            Button {
+                id: sliderMenu
+                text: "..."
+                onClicked:  sliderMenuPopup.open()
+
+            }
 
             Slider {
                 id: mediaPositionSlider
@@ -338,11 +386,64 @@ Rectangle {
                 to: mediaPlayer.duration
                 value: mediaPlayer.position
                 enabled: mediaPlayer.seekable
-                width: mainWindow.width * 0.5
+                width: mainWindow.width * 0.3
                 visible: !isImage
                 onPressedChanged: {
                     if (!pressed) {
                         mediaPlayer.position = value
+                    }
+                }
+            }
+
+            Dialog {
+                id: sliderMenuPopup
+                width: mainWindow.width * 0.6
+                height: mainWindow.height * 0.6
+                anchors.centerIn: mainWindow
+                title: "Video Playback"
+                padding: 10
+
+                palette { windowText: "white" }
+
+                Column {
+                    id: dialogColumn
+                    spacing: 10
+                    width: parent.width - (2 * sliderMenuPopup.padding)
+
+                    Text {
+                        text: "Speed"
+                        color: sliderMenuPopup.palette.windowText
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+                    Slider {
+                        id: mediaPlaybackSider
+                        from: 0.1
+                        to: 3.0
+                        value: mediaPlayer.playbackRate
+                        enabled: !isImage
+                        visible: !isImage
+                        width: parent.width
+                        onMoved: {
+                            mediaPlayer.playbackRate = value
+                        }
+                    }
+
+                    Text {
+                        text: "Rotation"
+                        color: sliderMenuPopup.palette.windowText
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+                    Slider {
+                        id: rotationSider
+                        from: 0
+                        to: 360
+                        value: videoOutput.rotation
+                        visible: !isImage
+                        width: parent.width
+                        onMoved: {
+                            videoOutput.rotation = value
+                            imageDisplay.rotation = value
+                        }
                     }
                 }
             }
