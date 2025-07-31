@@ -12,13 +12,34 @@ APP_NAME="ump3"
 INSTALL_DIR="/opt/$APP_NAME"
 
 # --- Dependency Checking ---
-echo "Checking for required tools (git, qmake, make)..."
-for tool in git qmake make; do
-    if ! command -v $tool &> /dev/null; then
-        echo "Error: $tool is not installed. Please install it and try again."
-        exit 1
+echo "Checking for required tools..."
+
+# --- Distribution-specific dependency installation ---
+if ! command -v git &> /dev/null || ! command -v qmake6 &> /dev/null || ! command -v make &> /dev/null; then
+    echo "One or more required tools are not installed."
+    if [ -f /etc/debian_version ]; then
+        echo "On Debian/Ubuntu, you can install them with:"
+        echo "sudo apt-get update && sudo apt-get install -y git qt6-base-dev build-essential"
+    elif [ -f /etc/fedora-release ]; then
+        echo "On Fedora, you can install them with:"
+        echo 'sudo dnf groupinstall -y "C Development Tools and Libraries" "Development Tools"'
+        echo 'sudo dnf install -y qt6-qtbase-devel'
+    elif [ -f /etc/arch-release ]; then
+        echo "On Arch Linux, you can install them with:"
+        echo "sudo pacman -Syu --needed base-devel git qt6-base"
+    elif [ -f /etc/alpine-release ]; then
+        echo "On Alpine Linux, you can install them with:"
+        echo "apk add git build-base qt6-qtbase-dev"
+    elif grep -q 'ID=opensuse' /etc/os-release; then
+        echo "On openSUSE, you can install them with:"
+        echo "sudo zypper install -t pattern devel_basis"
+        echo "sudo zypper install -t pattern devel_qt6"
+    else
+        echo "Please install git, Qt 6 development tools (providing qmake6), and make."
     fi
-done
+    exit 1
+fi
+
 echo "Dependencies are satisfied."
 
 # --- Create Temporary Build Directory ---
