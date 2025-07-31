@@ -7,8 +7,8 @@ set -e
 
 # --- Configuration ---
 REPO_URL="https://github.com/dmxruser/ump3.git"
-APP_NAME="HEllo"
-INSTALL_DIR="/opt/$APP_NAME"
+APP_NAME="ump3"
+INSTALL_DIR="/opt/ump3"
 
 # --- Dependency Checking ---
 echo "Checking for required tools (git, qmake, make)..."
