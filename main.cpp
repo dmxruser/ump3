@@ -7,6 +7,10 @@
 
 int main(int argc, char *argv[])
 {
+    qputenv("QT_MEDIA_BACKEND", "ffmpeg");
+    qputenv("FFMPEG_HWACCEL", "none");
+    qputenv("QT_AVOID_VAAPI", "1");
+
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/sure.png"));
 

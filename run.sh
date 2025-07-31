@@ -19,4 +19,5 @@ make
 
 # Run the application
 echo "Running the application..."
+export QT_FFMPEG_DECODING_HW_DEVICE_TYPES=none
 ./HEllo
