@@ -7,8 +7,9 @@ set -e
 
 # --- Configuration ---
 REPO_URL="https://github.com/dmxruser/ump3.git"
+PROJECT_NAME="HEllo"
 APP_NAME="ump3"
-INSTALL_DIR="/opt/ump3"
+INSTALL_DIR="/opt/$APP_NAME"
 
 # --- Dependency Checking ---
 echo "Checking for required tools (git, qmake, make)..."
@@ -38,13 +39,24 @@ echo "Installing application to $INSTALL_DIR..."
 echo "This step requires superuser privileges."
 
 sudo mkdir -p "$INSTALL_DIR/bin"
-sudo cp "$APP_NAME" "$INSTALL_DIR/bin/"
+sudo cp "$PROJECT_NAME" "$INSTALL_DIR/bin/$APP_NAME"
 
 echo "Installing desktop entry and icon..."
 sudo mkdir -p "/usr/share/applications/"
 sudo mkdir -p "/usr/share/icons/hicolor/256x256/apps/"
 
-sudo cp "$APP_NAME.desktop" "/usr/share/applications/$APP_NAME.desktop"
+# Create a desktop file with the correct paths
+sudo tee "/usr/share/applications/$APP_NAME.desktop" > /dev/null <<EOL
+[Desktop Entry]
+Version=1.0
+Name=$APP_NAME
+Comment=Music Player
+Exec=$INSTALL_DIR/bin/$APP_NAME
+Icon=/usr/share/icons/hicolor/256x256/apps/$APP_NAME.png
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;
+EOL
 
 sudo cp "sure.png" "/usr/share/icons/hicolor/256x256/apps/$APP_NAME.png"
 

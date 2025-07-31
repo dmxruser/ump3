@@ -2,8 +2,8 @@
 Version=1.0
 Name=ump3
 Comment=A simple Qt application
-Exec=/opt/HEllo/bin/HEllo
-Icon=/usr/share/icons/hicolor/256x256/apps/HEllo.png
+Exec=/opt/ump3/bin/ump3
+Icon=/usr/share/icons/hicolor/256x256/apps/ump3.png
 Terminal=false
 Type=Application
 Categories=AudioVideo;
