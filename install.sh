@@ -1,48 +1,58 @@
 #!/bin/bash
 
-# This script will build and install the HEllo application.
+# This script will download, build, and install the HEllo application.
 
-# Exit on error
+# Exit on any error
 set -e
 
+# --- Configuration ---
+REPO_URL="https://github.com/dmxruser/ump3.git"
+APP_NAME="HEllo"
+INSTALL_DIR="/opt/$APP_NAME"
+
 # --- Dependency Checking ---
-echo "Checking for required tools..."
-for tool in wget chmod qmake make; do
+echo "Checking for required tools (git, qmake, make)..."
+for tool in git qmake make; do
     if ! command -v $tool &> /dev/null; then
-        echo "$tool could not be found. Please install it and try again."
+        echo "Error: $tool is not installed. Please install it and try again."
         exit 1
     fi
 done
-echo "All required tools are available."
+echo "Dependencies are satisfied."
 
-# --- linuxdeployqt Setup ---
-if ! command -v linuxdeployqt &> /dev/null; then
-    echo "linuxdeployqt not found. Downloading it..."
-    wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" -O linuxdeployqt
-    chmod a+x linuxdeployqt
-    sudo mv linuxdeployqt /usr/local/bin/linuxdeployqt
-fi
+# --- Create Temporary Build Directory ---
+BUILD_DIR=$(mktemp -d)
+echo "Created temporary build directory at $BUILD_DIR"
 
-# --- Build the Application ---
-echo "Building the HEllo application..."
-qmake HEllo.pro
+# --- Clone & Build ---
+echo "Cloning the repository from $REPO_URL..."
+git clone "$REPO_URL" "$BUILD_DIR"
+cd "$BUILD_DIR"
+
+echo "Building the application..."
+qmake6
 make
 
-# --- Prepare for AppImage ---
-echo "Creating AppDir structure..."
-mkdir -p AppDir/usr/bin
-mkdir -p AppDir/usr/share/applications
-mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+# --- Installation ---
+echo "Installing application to $INSTALL_DIR..."
+echo "This step requires superuser privileges."
 
-# --- Copy Application Files ---
-echo "Copying application files..."
-cp HEllo AppDir/usr/bin/
-cp sure.png AppDir/usr/share/icons/hicolor/256x256/apps/HEllo.png
-cp HEllo.desktop AppDir/usr/share/applications/
+sudo mkdir -p "$INSTALL_DIR/bin"
+sudo cp "$APP_NAME" "$INSTALL_DIR/bin/"
 
-# --- Run linuxdeployqt ---
-echo "Bundling dependencies with linuxdeployqt..."
-linuxdeployqt AppDir/usr/share/applications/HEllo.desktop -appimage
+echo "Installing desktop entry and icon..."
+sudo mkdir -p "/usr/share/applications/"
+sudo mkdir -p "/usr/share/icons/hicolor/256x256/apps/"
 
+sudo cp "$APP_NAME.desktop" "/usr/share/applications/$APP_NAME.desktop"
+
+sudo cp "sure.png" "/usr/share/icons/hicolor/256x256/apps/$APP_NAME.png"
+
+# --- Cleanup ---
+echo "Cleaning up build files..."
+cd /
+rm -rf "$BUILD_DIR"
+
+echo ""
 echo "Installation complete!"
-echo "You can now run the HEllo application from your application menu or by running the generated AppImage."
+echo "You can now find '$APP_NAME' in your application menu."
