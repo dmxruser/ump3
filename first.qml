@@ -47,7 +47,7 @@ ApplicationWindow {
             mainQml = item;
             // Connect to the signal from main.qml to control the playback bar
             mainQml.menuBarVisibilityRequest.connect(function(show) {
-                mediaPlayer.visible = show;
+                // mediaPlayer.visible = show; // This is the line causing the error
             });
 
             if (pendingFileUrl) {
