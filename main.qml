@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
 import QtMultimedia
-import "." // Import current directory to find MetadataPopup
+import "." // Import cFurrent directory to find MetadataPopup
 
 Rectangle {
     id: mainWindow
@@ -200,8 +200,9 @@ Rectangle {
     MediaPlayer {
         id: mediaPlayer
         videoOutput: videoOutput
-        audioOutput: AudioOutput {}
-
+        audioOutput: AudioOutput {
+            volume: mediaVolumeSider.value
+        }
         onPlaybackStateChanged: function(state) {
             isPlaying = state === MediaPlayer.PlayingState
             // If playback stops for any reason other than the media ending on its own
@@ -397,11 +398,13 @@ Rectangle {
 
             Dialog {
                 id: sliderMenuPopup
+                parent: mainWindow
                 width: mainWindow.width * 0.6
                 height: mainWindow.height * 0.6
-                anchors.centerIn: mainWindow
                 title: "Video Playback"
                 padding: 10
+                x: (mainWindow.width - width) / 2
+                y: mainWindow.height - height - a.height - 10
 
                 palette { windowText: "white" }
 
@@ -410,6 +413,20 @@ Rectangle {
                     spacing: 10
                     width: parent.width - (2 * sliderMenuPopup.padding)
 
+                    Text {
+                        text: "Volume"
+                        color: sliderMenuPopup.palette.windowText
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+                    Slider {
+                        id: mediaVolumeSider
+                        from: 0
+                        to: 3.0
+                        value: mediaPlayer.playbackRate
+                        enabled: !isImage
+                        visible: !isImage
+                        width: parent.width
+                    }
                     Text {
                         text: "Speed"
                         color: sliderMenuPopup.palette.windowText
