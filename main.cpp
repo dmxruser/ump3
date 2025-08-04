@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/sure.png"));
+    app.setApplicationName("ump3");
+    app.setDesktopFileName("HEllo.desktop");
 
     QQmlApplicationEngine engine;
     Backend backend;

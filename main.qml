@@ -422,7 +422,7 @@ Rectangle {
                         id: mediaVolumeSider
                         from: 0
                         to: 3.0
-                        value: mediaPlayer.playbackRate
+                        value: 1
                         enabled: !isImage
                         visible: !isImage
                         width: parent.width
