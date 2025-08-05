@@ -9,6 +9,8 @@ ApplicationWindow {
     visible: true
     width: 640
     height: 480
+    minimumWidth: 640 // Example minimum width
+    minimumHeight: 325 // Example minimum height
     title: "ump3"
 
     MouseArea {
@@ -18,6 +20,7 @@ ApplicationWindow {
             if (mouse.button === Qt.RightButton) {
                 console.log("first.qml right clicked")
                 contextMenu.popup()
+
             }
         }
     }

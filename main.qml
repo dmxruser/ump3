@@ -12,6 +12,7 @@ Rectangle {
     property var playlist: []
     property int currentPlaylistIndex: -1
 
+
     signal menuBarVisibilityRequest(bool show) // wrong name but whatever and it wroks
 
     MouseArea {
@@ -387,7 +388,7 @@ Rectangle {
                 to: mediaPlayer.duration
                 value: mediaPlayer.position
                 enabled: mediaPlayer.seekable
-                width: mainWindow.width * 0.3
+                width: mainWindow.width * 0.35
                 visible: !isImage
                 onPressedChanged: {
                     if (!pressed) {
