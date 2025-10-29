@@ -407,8 +407,6 @@ Rectangle {
                 x: (mainWindow.width - width) / 2
                 y: mainWindow.height - height - a.height - 10
 
-                palette { windowText: "white" }
-
                 Column {
                     id: dialogColumn
                     spacing: 10
@@ -416,7 +414,7 @@ Rectangle {
 
                     Text {
                         text: "Volume"
-                        color: sliderMenuPopup.palette.windowText
+                        // color: sliderMenuPopup.palette.windowText // Let the theme handle text color
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
                     Slider {
@@ -430,7 +428,7 @@ Rectangle {
                     }
                     Text {
                         text: "Speed"
-                        color: sliderMenuPopup.palette.windowText
+                        // color: sliderMenuPopup.palette.windowText // Let the theme handle text color
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
                     Slider {
@@ -448,7 +446,7 @@ Rectangle {
 
                     Text {
                         text: "Rotation"
-                        color: sliderMenuPopup.palette.windowText
+                        // color: sliderMenuPopup.palette.windowText // Let the theme handle text color
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
                     Slider {

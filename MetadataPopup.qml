@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material // Import Material for theme context
 import QtQuick.Layouts
 import QtMultimedia
 
@@ -63,13 +64,14 @@ Popup {
             font.bold: true
             font.pointSize: 16
             Layout.alignment: Qt.AlignHCenter
-            color: mainWindow.palette.text
+            // Removed explicit color to let Material theme handle it
         }
 
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: "lightgray"
+            // Adjust separator color for dark theme
+            color: Material.theme === Material.Dark ? "#424242" : "lightgray"
             radius: 1
         }
 
@@ -88,13 +90,13 @@ Popup {
                     font.bold: true
                     Layout.preferredWidth: parent.width * 0.3
                     elide: Text.ElideRight
-                    color: mainWindow.palette.text
+                    // Removed explicit color to let Material theme handle it
                 }
                 Text {
                     text: model.value
                     Layout.fillWidth: true
                     wrapMode: Text.WrapAnywhere
-                    color: mainWindow.palette.text
+                    // Removed explicit color to let Material theme handle it
                 }
             }
         }

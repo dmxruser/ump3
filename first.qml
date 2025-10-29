@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material // Import Material style for modern theming
 import QtQuick.Dialogs
 import QtMultimedia
 import "."
@@ -12,6 +13,11 @@ ApplicationWindow {
     minimumWidth: 640 // Example minimum width
     minimumHeight: 325 // Example minimum height
     title: "ump3"
+    color: "#1E1E1E" // Set a dark background for the ApplicationWindow
+
+    // Apply Material dark theme
+    Material.theme: Material.Dark
+    Material.accentColor: Material.Orange // A vibrant accent color for controls
 
     MouseArea {
         anchors.fill: parent
