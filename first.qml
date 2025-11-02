@@ -54,10 +54,9 @@ ApplicationWindow {
         onLoaded: {
             // Store the loaded item and process any pending URL
             mainQml = item;
-            // Connect to the signal from main.qml to control the playback bar
-            mainQml.menuBarVisibilityRequest.connect(function(show) {
-                // mediaPlayer.visible = show; // This is the line causing the error
-            });
+            // The previous attempt to control 'mediaPlayer.visible' from here was incorrect as 'mediaPlayer'
+            // is an internal ID of main.qml. The signal 'menuBarVisibilityRequest' is no longer used for this purpose.
+            // Playback bar visibility is now managed within main.qml itself.
 
             if (pendingFileUrl) {
                 mainQml.loadMedia(pendingFileUrl);

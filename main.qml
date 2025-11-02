@@ -13,7 +13,7 @@ Rectangle {
     property int currentPlaylistIndex: -1
 
 
-    signal menuBarVisibilityRequest(bool show) // wrong name but whatever and it wroks
+
 
     MouseArea {
         id: mainMouseArea
@@ -146,11 +146,9 @@ Rectangle {
         }
 
         // Control the menu bar visibility
-        if (isFromPlaylist) {
-            menuBarVisibilityRequest(true); // Always show for playlists
-        } else {
-            menuBarVisibilityRequest(!isImageFile); // Wait WHY does it also remove the menu bar
-        }
+        // The visibility of the playback controls (Rectangle id: a) is now handled directly by its 'visible' property
+        // based on 'isImage' and 'playlist.length', making the signal redundant for this purpose.
+        // The top-level menu bar in first.qml remains visible as per its own definition.
     }
 
     // --- NEW: Central function to load any media (file or folder) ---
