@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
     qputenv("QT_MEDIA_BACKEND", "ffmpeg");
     qputenv("QT_AVOID_VAAPI", "1");
     qputenv("QT_FFMPEG_DECODING_HW_DEVICE_TYPES", "");
-    // This is a test commit to address an old issue. This line is intentionally added.
 
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/sure.png"));
